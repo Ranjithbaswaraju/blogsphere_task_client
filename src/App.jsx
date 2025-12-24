@@ -6,7 +6,7 @@ import AdminDashBoard from "../components/AdminDashBoard"
 import AuthorDashBoard from "../components/AuthorDashBoard"
 
 
- export const baseURL="https://blogsphere-task-server-1.onrender.com"
+ export const baseURL="https://blogsphere-task-server-2.onrender.com"
 
 
 function App() {
