@@ -11,50 +11,47 @@ const CreatePost = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const token = localStorage.getItem("token");
 
-    await axios.post(
-      `${baseURL}/post/postPost`,
-      { title, content, status },
-      {
+    try {
+      const res = await axios.post(
+        `${baseURL}/post/postPost`,
+        { title, content, status },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setPosts([...posts, res.data.post]); // use backend response
+      alert("Blog Created");
+      setTitle("");
+      setContent("");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to create blog");
+    }
+  };
+
+  // ✅ DELETE HANDLER (THIS WAS MISSING)
+  const deleteHandler = async (postId) => {
+    const token = localStorage.getItem("token");
+
+    try {
+      await axios.delete(`${baseURL}/post/deletePost/${postId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
-    );
-    setPosts([...posts,{title,content,status}]);
-    alert("Blog Created");
-    setTitle("");
-    setContent("");
+      });
+
+      setPosts(posts.filter((post) => post._id !== postId));
+      alert("Post deleted successfully");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete post");
+    }
   };
-
-//   const deleteHandler = async (postId) => {
-//     const token = localStorage.getItem("token");
-//     await axios.delete(`${baseURL}/post/deletePost/${postId}`, {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-//     setPosts(posts.filter(( post) => post._id != postId));
-//   };
-
-const deleteHandler = async (postId) => {
-  const token = localStorage.getItem("token");
-
-  try {
-   await axios.delete(`${baseURL}/post/deletePost/${postId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setPosts(posts.filter((post) => post._id !== postId));
-    alert("Post deleted successfully");
-  } catch (err) {
-    console.log(err);
-    
-    alert("Failed to delete post");
-  }
-};
-
 
   return (
     <>
@@ -93,34 +90,34 @@ const deleteHandler = async (postId) => {
           Create Blog
         </Button>
       </Form>
+
       <div
         style={{
           display: "flex",
           justifyContent: "start",
           alignItems: "center",
-
           gap: "20px",
           flexWrap: "wrap",
           padding: "20px",
         }}
       >
-        {posts.map((post, index) => (
-          <Card key={index} style={{ width: "250px", border: "2px solid red" }}>
+        {posts.map((post) => (
+          <Card key={post._id} style={{ width: "250px", border: "2px solid red" }}>
             <Card.Body>
               <Card.Title>
-                <b>Title:</b>
-                {post.title}
+                <b>Title:</b> {post.title}
               </Card.Title>
               <Card.Text>
-                <b>Content:</b>
-                {post.content}
+                <b>Content:</b> {post.content}
               </Card.Text>
               <Card.Text>
                 <small className="text-muted">
                   <b>Status :</b> {post.status}
                 </small>
               </Card.Text>
-              <Button onClick={() => deleteHandler(post._id)}>Delete</Button>
+              <Button variant="danger" onClick={() => deleteHandler(post._id)}>
+                Delete
+              </Button>
             </Card.Body>
           </Card>
         ))}
