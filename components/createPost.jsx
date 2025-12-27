@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Card, Form } from "react-bootstrap";
 import axios from "axios";
 import { baseURL } from "../src/App";
@@ -8,6 +8,21 @@ const CreatePost = () => {
   const [content, setContent] = useState("");
   const [status, setStatus] = useState("draft");
   const [posts, setPosts] = useState([]);
+
+  // FETCH ALL POSTS ON LOAD
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const res = await axios.get(`${baseURL}/post/getPost`);
+        if (res.data && res.data.posts) {
+          setPosts(res.data.posts);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchPosts();
+  }, []);
 
   // CREATE POST
   const handleSubmit = async (e) => {
@@ -26,15 +41,15 @@ const CreatePost = () => {
       );
 
       // ✅ USE BACKEND RESPONSE (_id from MongoDB)
-      if (res.data && res.data.post) {
-        setPosts((prev) => [...prev, res.data.post]);
+      if (res.data && res.data.user) {
+        setPosts((prev) => [...prev, res.data.user]);
       }
 
       alert("Blog Created");
       setTitle("");
       setContent("");
     } catch (err) {
-      console.error(err);
+      console.error(err.response?.data || err.message);
       alert("Failed to create blog");
     }
   };
@@ -53,7 +68,7 @@ const CreatePost = () => {
       setPosts((prev) => prev.filter((post) => post._id !== postId));
       alert("Post deleted successfully");
     } catch (err) {
-      console.error(err);
+      console.error(err.response?.data || err.message);
       alert("Failed to delete post");
     }
   };
