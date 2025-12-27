@@ -15,7 +15,7 @@ const CreatePost = () => {
     const token = localStorage.getItem("token");
 
     try {
-      await axios.post(
+      const res = await axios.post(
         `${baseURL}/post/postPost`,
         { title, content, status },
         {
@@ -25,16 +25,10 @@ const CreatePost = () => {
         }
       );
 
-      // 🔒 SAFELY ADD POST TO STATE
-      setPosts((prev) => [
-        ...prev,
-        {
-          _id: Date.now(), // temp id
-          title,
-          content,
-          status,
-        },
-      ]);
+      // ✅ USE BACKEND RESPONSE (_id from MongoDB)
+      if (res.data && res.data.post) {
+        setPosts((prev) => [...prev, res.data.post]);
+      }
 
       alert("Blog Created");
       setTitle("");
