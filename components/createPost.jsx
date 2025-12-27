@@ -9,12 +9,13 @@ const CreatePost = () => {
   const [status, setStatus] = useState("draft");
   const [posts, setPosts] = useState([]);
 
+  // CREATE POST
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
 
     try {
-      const res = await axios.post(
+      await axios.post(
         `${baseURL}/post/postPost`,
         { title, content, status },
         {
@@ -24,7 +25,17 @@ const CreatePost = () => {
         }
       );
 
-      setPosts([...posts, res.data.post]); // use backend response
+      // 🔒 SAFELY ADD POST TO STATE
+      setPosts((prev) => [
+        ...prev,
+        {
+          _id: Date.now(), // temp id
+          title,
+          content,
+          status,
+        },
+      ]);
+
       alert("Blog Created");
       setTitle("");
       setContent("");
@@ -34,7 +45,7 @@ const CreatePost = () => {
     }
   };
 
-  // ✅ DELETE HANDLER (THIS WAS MISSING)
+  // DELETE POST
   const deleteHandler = async (postId) => {
     const token = localStorage.getItem("token");
 
@@ -45,7 +56,7 @@ const CreatePost = () => {
         },
       });
 
-      setPosts(posts.filter((post) => post._id !== postId));
+      setPosts((prev) => prev.filter((post) => post._id !== postId));
       alert("Post deleted successfully");
     } catch (err) {
       console.error(err);
@@ -55,6 +66,7 @@ const CreatePost = () => {
 
   return (
     <>
+      {/* CREATE FORM */}
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
           <Form.Control
@@ -91,6 +103,7 @@ const CreatePost = () => {
         </Button>
       </Form>
 
+      {/* POSTS LIST */}
       <div
         style={{
           display: "flex",
@@ -101,21 +114,32 @@ const CreatePost = () => {
           padding: "20px",
         }}
       >
+        {posts.length === 0 && <p>No posts created yet</p>}
+
         {posts.map((post) => (
-          <Card key={post._id} style={{ width: "250px", border: "2px solid red" }}>
+          <Card
+            key={post._id}
+            style={{ width: "250px", border: "2px solid red" }}
+          >
             <Card.Body>
               <Card.Title>
                 <b>Title:</b> {post.title}
               </Card.Title>
+
               <Card.Text>
                 <b>Content:</b> {post.content}
               </Card.Text>
+
               <Card.Text>
                 <small className="text-muted">
                   <b>Status :</b> {post.status}
                 </small>
               </Card.Text>
-              <Button variant="danger" onClick={() => deleteHandler(post._id)}>
+
+              <Button
+                variant="danger"
+                onClick={() => deleteHandler(post._id)}
+              >
                 Delete
               </Button>
             </Card.Body>
